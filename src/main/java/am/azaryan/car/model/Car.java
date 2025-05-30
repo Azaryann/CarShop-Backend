@@ -22,8 +22,7 @@ public class Car {
 
     private String imageUrl;
 
-    @ManyToOne(cascade = CascadeType.ALL)
-    @JoinColumn(name = "purchaser_id", nullable = true)
+    @ManyToOne
     private Purchaser purchaser;
 }
 

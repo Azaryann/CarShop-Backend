@@ -9,7 +9,6 @@ public interface PurchaserService {
     PurchaserDto getPurchaserById(Long id);
     PurchaserDto createPurchaser(PurchaserDto purchaserDto);
     PurchaserDto updatePurchaser(Long id, PurchaserDto purchaserDto);
-    void deletePurchaser(Long id);
 }
 
 

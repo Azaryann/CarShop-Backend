@@ -35,10 +35,5 @@ public class PurchaserController {
         return ResponseEntity.ok(purchaserService.updatePurchaser(id, purchaserDto));
     }
 
-    @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deletePurchaser(@PathVariable Long id) {
-        purchaserService.deletePurchaser(id);
-        return ResponseEntity.noContent().build();
-    }
 }
 

@@ -97,9 +97,10 @@ public class CarServiceImpl implements CarService {
     }
 
     public void deleteCar(Long id) {
-        Car car = carRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Car not found with id: " + id));
-        carRepository.delete(car);
+        if (!carRepository.existsById(id)) {
+            throw new RuntimeException("Car not found");
+        }
+       carRepository.deleteById(id);
     }
 
     public String uploadFile(Long id, MultipartFile file) throws IOException {

@@ -4,6 +4,7 @@ import am.azaryan.car.dto.PurchaserDto;
 import am.azaryan.car.exception.ResourceNotFoundException;
 import am.azaryan.car.mapper.PurchaserMapper;
 import am.azaryan.car.model.Purchaser;
+import am.azaryan.car.repository.CarRepository;
 import am.azaryan.car.repository.PurchaserRepository;
 import am.azaryan.car.service.PurchaserService;
 import lombok.RequiredArgsConstructor;
@@ -18,6 +19,7 @@ public class PurchaserServiceImpl implements PurchaserService {
 
     private final PurchaserRepository purchaserRepository;
     private final PurchaserMapper purchaserMapper;
+    private final CarRepository carRepository;
 
     @Override
     public List<PurchaserDto> getAllPurchasers() {
@@ -51,10 +53,5 @@ public class PurchaserServiceImpl implements PurchaserService {
         return purchaserMapper.toDto(updatedPurchaser);
     }
 
-    @Override
-    public void deletePurchaser(Long id) {
-        Purchaser purchaser = purchaserRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Purchaser not found with id: " + id));
-        purchaserRepository.delete(purchaser);
-    }
+
 }
