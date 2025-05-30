@@ -16,7 +16,7 @@ public interface CarService {
 
     String saveCarImage(MultipartFile file);
 
-    CarDto updateCar(Long id, CarDto carDto);
+    CarDto updateCar(Long id, CarDto carDto, MultipartFile file);
 
     void deleteCar(Long id);
 

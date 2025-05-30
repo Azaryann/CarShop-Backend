@@ -47,10 +47,13 @@ public class CarController {
         return ResponseEntity.ok(savedCar);
     }
 
-
-    @PutMapping("/{id}")
-    public ResponseEntity<CarDto> updateCar(@PathVariable Long id, @RequestBody CarDto carDto) {
-        return ResponseEntity.ok(carService.updateCar(id, carDto));
+    @PutMapping(value = "/{id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<CarDto> updateCar(
+            @PathVariable Long id,
+            @RequestPart("car") CarDto carDto,
+            @RequestPart(value = "image", required = false) MultipartFile file
+    ) {
+        return ResponseEntity.ok(carService.updateCar(id, carDto, file));
     }
 
     @DeleteMapping("/{id}")

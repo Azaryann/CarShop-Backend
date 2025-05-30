@@ -70,45 +70,58 @@ public class CarServiceImpl implements CarService {
             String fileName = System.currentTimeMillis() + "_" + file.getOriginalFilename();
             Path filePath = uploadPath.resolve(fileName);
 
-            Files.copy(file.getInputStream(), filePath);
+            Files.copy(file.getInputStream(), filePath, StandardCopyOption.REPLACE_EXISTING);
 
-            // Возвращаем относительный путь для доступа по HTTP
             return "/uploads/" + fileName;
         } catch (IOException e) {
             throw new RuntimeException("Ошибка при сохранении изображения", e);
         }
     }
 
-    public CarDto updateCar(Long id, CarDto carDto) {
-        Car car = carRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Car not found with id: " + id));
-        car.setBrand(carDto.getBrand());
-        car.setModel(carDto.getModel());
-        car.setYear(carDto.getYear());
-        car.setPrice(carDto.getPrice());
-        car.setImageUrl(carDto.getImageUrl());
-        if (carDto.getPurchaserId() != null) {
-            Purchaser purchaser = purchaserRepository.findById(carDto.getPurchaserId())
-                    .orElseThrow(() -> new ResourceNotFoundException("Purchaser not found with id: " + carDto.getPurchaserId()));
-            car.setPurchaser(purchaser);
+    public CarDto updateCar(Long id, CarDto carDto, MultipartFile file) {
+        try {
+            Car car = carRepository.findById(id)
+                    .orElseThrow(() -> new ResourceNotFoundException("Car not found with id: " + id));
+
+            car.setBrand(carDto.getBrand());
+            car.setModel(carDto.getModel());
+            car.setYear(carDto.getYear());
+            car.setPrice(carDto.getPrice());
+
+            if (file != null && !file.isEmpty()) {
+                String imagePath = saveCarImage(file);
+                car.setImageUrl(imagePath);
+            } else if (carDto.getImageUrl() != null) {
+                car.setImageUrl(carDto.getImageUrl());
+            }
+
+            if (carDto.getPurchaserId() != null) {
+                Purchaser purchaser = purchaserRepository.findById(carDto.getPurchaserId())
+                        .orElseThrow(() -> new ResourceNotFoundException("Purchaser not found with id: " + carDto.getPurchaserId()));
+                car.setPurchaser(purchaser);
+            }
+
+            Car updatedCar = carRepository.save(car);
+            return carMapper.toDto(updatedCar);
+        } catch (ResourceNotFoundException e) {
+            throw e;
+        } catch (Exception e) {
+            throw new RuntimeException("Неожиданная ошибка при обновлении автомобиля", e);
         }
-        Car updatedCar = carRepository.save(car);
-        return carMapper.toDto(updatedCar);
     }
 
     public void deleteCar(Long id) {
         if (!carRepository.existsById(id)) {
             throw new RuntimeException("Car not found");
         }
-       carRepository.deleteById(id);
+        carRepository.deleteById(id);
     }
 
     public String uploadFile(Long id, MultipartFile file) throws IOException {
         Car car = carRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Car not found with id: " + id));
 
-        String UPLOAD_DIR = "uploads/";
-        Path uploadPath = Path.of(UPLOAD_DIR);
+        Path uploadPath = Paths.get(UPLOAD_DIRECTORY);
         if (!Files.exists(uploadPath)) {
             Files.createDirectories(uploadPath);
         }
@@ -117,9 +130,10 @@ public class CarServiceImpl implements CarService {
         Path filePath = uploadPath.resolve(fileName);
         Files.copy(file.getInputStream(), filePath, StandardCopyOption.REPLACE_EXISTING);
 
-        car.setImageUrl(fileName);
+        String imageUrl = "/uploads/" + fileName;
+        car.setImageUrl(imageUrl);
         carRepository.save(car);
 
-        return fileName;
+        return imageUrl;
     }
 }
